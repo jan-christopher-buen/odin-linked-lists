@@ -117,9 +117,7 @@ its result; custom conversion methods can add arbitrary work or throw.
 - `package.json`: ES module configuration and scripts.
 - `.gitignore`: dependencies, coverage, and logs.
 
-Local verification: `npm test` passes (the local runner reports one passing
-test file); `node --test --test-isolation=none` reports **15 tests passed, 0 failed**.
-Tests cover constructor defaults, empty and singleton lists, mutation order,
-strict equality, unrestricted values, rejected indexes, independent lists,
-and mixed operations. The demo output matches the required example exactly.
-`git diff --check` passes. No GitHub push or TOP submission is claimed.
+The automated suite contains 15 tests covering constructor defaults, empty
+and singleton lists, mutation order, strict equality, unrestricted values,
+rejected indexes, independent lists, and mixed operations. Run `npm test` to
+execute the suite. Run `npm start` to see the assignment demo shown above.
