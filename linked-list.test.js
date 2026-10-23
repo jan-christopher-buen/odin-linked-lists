@@ -123,3 +123,86 @@ test('toString formats empty, singleton, and unrestricted values exactly', () =>
   }
   assert.equal(values.toString(), '( null ) -> ( undefined ) -> ( false ) -> ( 0 ) -> ( Symbol(pet) ) -> ( custom ) -> null');
 });
+
+test('insertAt handles empty, head, middle, and end while retaining value order', () => {
+  const list = new LinkedList();
+  assert.equal(list.insertAt(0, 2, 3), undefined);
+  list.insertAt(0, 0, 1);
+  list.insertAt(2, 'a', 'b');
+  list.insertAt(6, 4, undefined);
+  assert.equal(list.toString(), '( 0 ) -> ( 1 ) -> ( a ) -> ( b ) -> ( 2 ) -> ( 3 ) -> ( 4 ) -> ( undefined ) -> null');
+  assert.equal(list.size(), 8);
+  assert.equal(list.head(), 0);
+  assert.equal(list.tail(), undefined);
+  assert.equal(list.at(7), undefined);
+  assert.equal(list.at(4), 2);
+});
+
+test('inserting no values validates the index and otherwise changes nothing', () => {
+  const list = new LinkedList();
+  assert.equal(list.insertAt(0), undefined);
+  assert.equal(list.size(), 0);
+  list.insertAt(0, 1, 2);
+  for (const index of [0, 1, 2]) assert.equal(list.insertAt(index), undefined);
+  assert.equal(list.toString(), '( 1 ) -> ( 2 ) -> null');
+});
+
+test('removeAt reconnects head, middle, tail, and singleton', () => {
+  const list = new LinkedList();
+  list.insertAt(0, 1, 2, 3, 4, 5);
+  assert.equal(list.removeAt(0), undefined);
+  assert.equal(list.head(), 2);
+  list.removeAt(1);
+  assert.equal(list.toString(), '( 2 ) -> ( 4 ) -> ( 5 ) -> null');
+  list.removeAt(2);
+  assert.equal(list.tail(), 4);
+  list.removeAt(0);
+  assert.equal(list.size(), 1);
+  list.removeAt(0);
+  assert.equal(list.size(), 0);
+  assert.equal(list.head(), undefined);
+  assert.equal(list.tail(), undefined);
+  assert.equal(list.toString(), '');
+});
+
+test('invalid mutations throw RangeError before changing any links', () => {
+  const list = new LinkedList();
+  const invalid = [-1, 1.5, '0', null, undefined, NaN, Infinity, -Infinity, {}, 0n];
+  for (const index of [...invalid, 1]) {
+    assert.throws(() => list.insertAt(index, 'x'), RangeError);
+    assert.throws(() => list.insertAt(index), RangeError);
+    assert.throws(() => list.removeAt(index), RangeError);
+    assert.equal(list.size(), 0);
+  }
+  assert.throws(() => list.removeAt(0), RangeError);
+  list.insertAt(0, 1, 2, 3);
+  for (const index of [...invalid, 4]) {
+    assert.throws(() => list.insertAt(index, 'x', 'y'), RangeError);
+    assert.throws(() => list.insertAt(index), RangeError);
+    assert.throws(() => list.removeAt(index), RangeError);
+    assert.equal(list.toString(), '( 1 ) -> ( 2 ) -> ( 3 ) -> null');
+    assert.equal(list.size(), 3);
+  }
+  assert.throws(() => list.removeAt(3), RangeError);
+  assert.equal(list.tail(), 3);
+});
+
+test('mixed mutations preserve links and independent instances', () => {
+  const list = new LinkedList();
+  const other = new LinkedList();
+  other.append('separate');
+  list.append(2);
+  list.prepend(1);
+  list.insertAt(1, false, null, undefined);
+  list.removeAt(2);
+  assert.equal(list.pop(), 1);
+  list.append(3);
+  list.removeAt(3);
+  list.insertAt(3, 4, 5);
+  assert.equal(list.toString(), '( false ) -> ( undefined ) -> ( 2 ) -> ( 4 ) -> ( 5 ) -> null');
+  assert.equal(list.size(), 5);
+  assert.equal(list.head(), false);
+  assert.equal(list.tail(), 5);
+  assert.equal(list.findIndex(undefined), 1);
+  assert.equal(other.toString(), '( separate ) -> null');
+});

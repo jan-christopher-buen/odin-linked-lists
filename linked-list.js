@@ -84,4 +84,45 @@ export class LinkedList {
     }
     return parts.length === 0 ? '' : `${parts.join(' -> ')} -> null`;
   }
+
+  insertAt(index, ...values) {
+    this.#validateIndex(index, true);
+    let previous = null;
+    let current = this.#head;
+    for (let position = 0; position < index; position += 1) {
+      previous = current;
+      current = current.nextNode;
+    }
+    for (const value of values) {
+      const node = new Node();
+      node.value = value;
+      node.nextNode = current;
+      if (previous === null) this.#head = node;
+      else previous.nextNode = node;
+      previous = node;
+    }
+  }
+
+  removeAt(index) {
+    this.#validateIndex(index, false);
+    if (index === 0) {
+      this.pop();
+      return;
+    }
+    let previous = this.#head;
+    for (let position = 0; position < index - 1; position += 1) {
+      previous = previous.nextNode;
+    }
+    previous.nextNode = previous.nextNode.nextNode;
+  }
+
+  #validateIndex(index, allowEnd) {
+    if (!Number.isInteger(index) || index < 0) {
+      throw new RangeError('Index must be a nonnegative integer');
+    }
+    const length = this.size();
+    if (index > length || (!allowEnd && index === length)) {
+      throw new RangeError('Index is out of bounds');
+    }
+  }
 }
