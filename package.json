@@ -1,0 +1,9 @@
+{
+  "name": "odin-linked-lists",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "test": "node --test"
+  }
+}
