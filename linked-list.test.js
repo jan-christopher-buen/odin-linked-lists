@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Node } from './node.js';
+import { LinkedList } from './linked-list.js';
 
 test('Node defaults both properties to null, including explicit undefined', () => {
   for (const node of [new Node(), new Node(undefined, undefined)]) {
@@ -16,8 +17,6 @@ test('Node retains the supplied value and next node reference', () => {
   assert.equal(node.value, value);
   assert.equal(node.nextNode, next);
 });
-
-import { LinkedList } from './linked-list.js';
 
 test('empty list accessors and pop return undefined', () => {
   const list = new LinkedList();
@@ -80,4 +79,47 @@ test('instances are independent and values include explicit undefined', () => {
   assert.equal(first.at(2), false);
   assert.equal(first.at(3), 0);
   assert.equal(second.size(), 0);
+});
+
+test('search handles empty lists, duplicates, and missing values', () => {
+  const list = new LinkedList();
+  assert.equal(list.contains('cat'), false);
+  assert.equal(list.findIndex('cat'), -1);
+  list.append('dog');
+  list.append('cat');
+  list.append('cat');
+  assert.equal(list.contains('cat'), true);
+  assert.equal(list.findIndex('cat'), 1);
+  assert.equal(list.findIndex('dog'), 0);
+  assert.equal(list.findIndex('bird'), -1);
+});
+
+test('search uses strict equality and object identity', () => {
+  const list = new LinkedList();
+  const object = { pet: 'cat' };
+  for (const value of [object, 0, false, null, undefined, NaN]) list.append(value);
+  assert.equal(list.contains(object), true);
+  assert.equal(list.findIndex(object), 0);
+  for (const value of [{ pet: 'cat' }, '0', NaN]) {
+    assert.equal(list.contains(value), false);
+    assert.equal(list.findIndex(value), -1);
+  }
+  assert.equal(list.findIndex(false), 2);
+  assert.equal(list.findIndex(null), 3);
+  assert.equal(list.findIndex(undefined), 4);
+  assert.equal(list.findIndex(-0), 1);
+});
+
+test('toString formats empty, singleton, and unrestricted values exactly', () => {
+  const list = new LinkedList();
+  assert.equal(list.toString(), '');
+  list.append('dog');
+  assert.equal(list.toString(), '( dog ) -> null');
+  list.append('cat');
+  assert.equal(list.toString(), '( dog ) -> ( cat ) -> null');
+  const values = new LinkedList();
+  for (const value of [null, undefined, false, 0, Symbol('pet'), { toString: () => 'custom' }]) {
+    values.append(value);
+  }
+  assert.equal(values.toString(), '( null ) -> ( undefined ) -> ( false ) -> ( 0 ) -> ( Symbol(pet) ) -> ( custom ) -> null');
 });

@@ -59,4 +59,29 @@ export class LinkedList {
     this.#head = this.#head.nextNode;
     return value;
   }
+
+  contains(value) {
+    return this.findIndex(value) !== -1;
+  }
+
+  findIndex(value) {
+    let current = this.#head;
+    let index = 0;
+    while (current !== null) {
+      if (current.value === value) return index;
+      current = current.nextNode;
+      index += 1;
+    }
+    return -1;
+  }
+
+  toString() {
+    const parts = [];
+    let current = this.#head;
+    while (current !== null) {
+      parts.push(`( ${String(current.value)} )`);
+      current = current.nextNode;
+    }
+    return parts.length === 0 ? '' : `${parts.join(' -> ')} -> null`;
+  }
 }
